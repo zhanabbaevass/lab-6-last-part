@@ -1,8 +1,14 @@
+import { useNavigate } from "react-router-dom";
 import { useFavorites } from "../context/FavoritesContext.jsx";
 import RecipeCard from "../components/RecipeCard";
 
 export default function Favorites() {
   const { favorites } = useFavorites();
+  const navigate = useNavigate();
+
+  const handleEditRecipe = (recipe) => {
+    navigate(`/edit-recipe/${recipe.id}`);
+  };
 
   return (
     <div>
@@ -13,7 +19,7 @@ export default function Favorites() {
         </p>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px", marginTop: "20px" }}>
-          {favorites.map((r) => <RecipeCard key={r.id} recipe={r} />)}
+          {favorites.map((r) => <RecipeCard key={r.id} recipe={r} onClick={() => handleEditRecipe(r)} />)}
         </div>
       )}
     </div>

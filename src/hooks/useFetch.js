@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 /**
  * useFetch – универсальный хук для загрузки данных с API
@@ -6,46 +6,29 @@ import { useState, useEffect, useCallback } from "react";
  * @returns {Object} { data, loading, error, refetch }
  */
 
-import { useState, useEffect, useCallback, useRef } from "react";
-
 export function useFetch(url) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const fetchData = useCallback(async () => {
-    if (!url) return;
+  const mountedRef = useRef(true);
 
   const loadData = useCallback(async () => {
+    if (!url) return;
     setLoading(true);
     setError(null);
 
     try {
       const response = await fetch(url);
-      if (!response.ok) throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
+      if (!response.ok)
+        throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
       const json = await response.json();
-      setData(json);
+      if (mountedRef.current) setData(json);
     } catch (err) {
-      setError(err.message || "Неизвестная ошибка");
-    } finally {
-      setLoading(false);
-    }
-  }, [url]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  return { data, loading, error, refetch: fetchData };
-}
-      const result = await fetcher();
-      if (mountedRef.current) setData(result);
-    } catch (fetchError) {
-      if (mountedRef.current) setError(fetchError);
+      if (mountedRef.current) setError(err.message || "Неизвестная ошибка");
     } finally {
       if (mountedRef.current) setLoading(false);
     }
-  }, deps);
+  }, [url]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -55,10 +38,5 @@ export function useFetch(url) {
     };
   }, [loadData]);
 
-  return {
-    data,
-    loading,
-    error,
-    refetch: loadData,
-  };
+  return { data, loading, error, refetch: loadData };
 }

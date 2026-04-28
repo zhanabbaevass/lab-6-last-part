@@ -1,80 +1,148 @@
-import { NavLink } from "react-router-dom";
+import { useState, useEffect, useMemo, useCallback, memo } from "react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useRecipes } from "../context/RecipeContext";
 
-export default function NavBar() {
-const { recipes, darkMode, toggleDarkMode } = useRecipes();
-  const favCount = recipes.filter((r) => r.liked).length;
+function NavBar() {
+  const { recipes, darkMode, toggleDarkMode } = useRecipes();
+  const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem("isAuthenticated") === "true");
 
-  const linkStyle = ({ isActive }) => ({
-    marginRight: "24px",
-    textDecoration: "none",
-    fontWeight: isActive ? "bold" : "normal",
-    color: isActive ? "#e67e22" : darkMode ? "#ccc" : "#333",
-    borderBottom: isActive ? "2px solid #e67e22" : "2px solid transparent",
-    paddingBottom: "6px",
-    fontSize: "16px",
-    transition: "color 0.2s",
-  });
+  useEffect(() => {
+    localStorage.setItem("isAuthenticated", isAuthenticated ? "true" : "false");
+  }, [isAuthenticated]);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    setIsAuthenticated(localStorage.getItem("isAuthenticated") === "true");
+  }, [location]);
+
+  const handleAuthToggle = useCallback(() => {
+    if (isAuthenticated) {
+      setIsAuthenticated(false);
+      localStorage.setItem("isAuthenticated", "false");
+      navigate("/");
+    } else {
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
+
+  const favCount = useMemo(() => recipes.filter((r) => r.liked).length, [recipes]);
+
+  const linkStyle = useCallback(
+    ({ isActive }) => ({
+      marginRight: "22px",
+      textDecoration: "none",
+      color: isActive ? "var(--accent)" : "var(--text-primary)",
+      borderBottom: isActive ? "2px solid var(--accent)" : "2px solid transparent",
+      paddingBottom: "6px",
+      fontSize: "15px",
+      fontWeight: isActive ? "700" : "500",
+      transition: "color 0.2s, border-bottom 0.2s",
+    }),
+    []
+  );
 
   return (
-    <nav style={{
-      background: darkMode ? "linear-gradient(90deg, #16213e, #0f3460)" : "linear-gradient(90deg, #fff5e6, #ffe0b2)",
-      padding: "16px 32px",
-      display: "flex",
-      alignItems: "center",
-      boxShadow: "0 2px 20px rgba(0,0,0,0.2)",
-      flexWrap: "wrap",
-      gap: "8px",
-    }}>
-      <span style={{ color: "#e67e22", fontWeight: "bold", fontSize: "20px", marginRight: "40px" }}>
-        🍽️ RecipeBook
-      </span>
-      <NavLink to="/" style={linkStyle}>🏠 Главная</NavLink>
-      <NavLink to="/recipes" style={linkStyle}>📖 Рецепты</NavLink>
-      <NavLink to="/favorites" style={linkStyle}>
-        ❤️ Избранное {favCount > 0 && (
-          <span style={{ background: "#e74c3c", color: "#fff", borderRadius: "50%", padding: "1px 6px", fontSize: "12px" }}>
-            {favCount}
-          </span>
-        )}
-      </NavLink>
-      <NavLink to="/profile" style={linkStyle}>👤 Профиль</NavLink>
+    <nav style={navStyle}>
+      <div style={brandStyle}>
+        <span style={logoStyle}>🍽️ RecipeBook</span>
+      </div>
 
-      <div
-  onClick={toggleDarkMode}
-  style={{
-    marginLeft: "auto",
-    width: "52px",
-    height: "28px",
-    borderRadius: "14px",
-    background: darkMode ? "#e67e22" : "#ccc",
-    cursor: "pointer",
-    position: "relative",
-    transition: "background 0.3s",
-    flexShrink: 0,
-  }}
->
-  <div style={{
-    position: "absolute",
-    top: "4px",
-    left: darkMode ? "28px" : "4px",
-    width: "20px",
-    height: "20px",
-    borderRadius: "50%",
-    background: "#fff",
-    transition: "left 0.3s",
-    boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-  }} />
-  <span style={{
-    position: "absolute",
-    top: "5px",
-    left: darkMode ? "6px" : "28px",
-    fontSize: "12px",
-    transition: "left 0.3s",
-  }}>
-    {darkMode ? "🌙" : "☀️"}
-  </span>
-</div>
+      <div style={linksStyle}>
+        <NavLink to="/" style={linkStyle}>Главная</NavLink>
+        <NavLink to="/recipes" style={linkStyle}>Рецепты</NavLink>
+        <NavLink to="/search" style={linkStyle}>Поиск</NavLink>
+        <NavLink to="/add-recipe" style={linkStyle}>Добавить</NavLink>
+        <NavLink to="/favorites" style={linkStyle}>
+          Избранное {favCount > 0 && <span style={badgeStyle}>{favCount}</span>}
+        </NavLink>
+        <NavLink to="/reviews" style={linkStyle}>Отзывы</NavLink>
+        <NavLink to="/profile" style={linkStyle}>Профиль</NavLink>
+        <NavLink to="/ai-assistant" style={linkStyle}>AI Ассистент</NavLink>
+      </div>
+
+      <div style={actionsStyle}>
+        <button onClick={handleAuthToggle} style={authButton}>
+          {isAuthenticated ? "Logout" : "Login"}
+        </button>
+        <button onClick={toggleDarkMode} style={themeButton}>
+          {darkMode ? "🌙" : "☀️"}
+        </button>
+      </div>
     </nav>
   );
 }
+
+const navStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "16px",
+  padding: "18px 24px",
+  width: "100%",
+  background: "var(--bg-secondary)",
+  borderBottom: "1px solid var(--border)",
+  boxShadow: "var(--shadow)",
+  flexWrap: "wrap",
+  position: "sticky",
+  top: 0,
+  zIndex: 100,
+};
+
+const brandStyle = {
+  minWidth: "180px",
+};
+
+const logoStyle = {
+  color: "var(--accent)",
+  fontWeight: "800",
+  fontSize: "18px",
+};
+
+const linksStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: "12px",
+};
+
+const badgeStyle = {
+  marginLeft: "8px",
+  display: "inline-block",
+  minWidth: "22px",
+  borderRadius: "999px",
+  background: "var(--accent)",
+  color: "#fff",
+  padding: "2px 8px",
+  fontSize: "12px",
+  textAlign: "center",
+};
+
+const actionsStyle = {
+  marginLeft: "auto",
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  flexWrap: "wrap",
+};
+
+const authButton = {
+  color: "var(--text-primary)",
+  background: "transparent",
+  border: "1px solid var(--accent)",
+  borderRadius: "999px",
+  padding: "10px 16px",
+  cursor: "pointer",
+};
+
+const themeButton = {
+  color: "#fff",
+  background: "var(--accent)",
+  border: "none",
+  borderRadius: "999px",
+  padding: "10px 16px",
+  cursor: "pointer",
+};
+
+export default memo(NavBar);

@@ -2,7 +2,7 @@ import { useRecipes } from "../context/RecipeContext";
 import { useNavigate } from "react-router-dom";
 
 export default function Home() {
-  const { recipes } = useRecipes();
+  const { recipes, resetRecipes } = useRecipes();
   const navigate = useNavigate();
 
   return (
@@ -41,6 +41,26 @@ export default function Home() {
       >
         Перейти к рецептам →
       </button>
+      
+      <div style={{ marginTop: "20px" }}>
+        <button
+          onClick={resetRecipes}
+          style={{
+            padding: "10px 20px",
+            background: "#95a5a6",
+            color: "#fff",
+            border: "none",
+            borderRadius: "20px",
+            fontSize: "14px",
+            cursor: "pointer",
+            opacity: 0.8,
+          }}
+          onMouseOver={e => e.target.style.opacity = "1"}
+          onMouseOut={e => e.target.style.opacity = "0.8"}
+        >
+          🔄 Сбросить рецепты (для обновления)
+        </button>
+      </div>
     </div>
   );
 }
