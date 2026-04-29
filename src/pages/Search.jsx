@@ -86,7 +86,10 @@ export default function Search() {
         {filteredRecipes.length > 0 ? (
           filteredRecipes.map((recipe) => (
             <div key={recipe.id}>
-              <RecipeCard recipe={recipe} />
+              <RecipeCard
+                recipe={recipe}
+                onClick={isUserRecipe(recipe.id) ? () => setEditingRecipe({ ...recipe }) : undefined}
+              />
               {isUserRecipe(recipe.id) && (
                 <div style={actionRow}>
                   <button style={editBtn} onClick={() => setEditingRecipe({ ...recipe })}>✏️ Изменить</button>
