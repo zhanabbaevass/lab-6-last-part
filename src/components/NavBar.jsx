@@ -46,14 +46,12 @@ function NavBar() {
   return (
     <nav style={navStyle}>
       <div style={brandStyle}>
-        <span style={logoStyle}>🍽️ RecipeBook</span>
+        <span style={logoStyle}>🍳 RecipeBook</span>
       </div>
 
       <div style={linksStyle}>
         <NavLink to="/" style={linkStyle}>Главная</NavLink>
         <NavLink to="/recipes" style={linkStyle}>Рецепты</NavLink>
-        <NavLink to="/search" style={linkStyle}>Поиск</NavLink>
-        <NavLink to="/add-recipe" style={linkStyle}>Добавить</NavLink>
         <NavLink to="/favorites" style={linkStyle}>
           Избранное {favCount > 0 && <span style={badgeStyle}>{favCount}</span>}
         </NavLink>
@@ -66,9 +64,21 @@ function NavBar() {
         <button onClick={handleAuthToggle} style={authButton}>
           {isAuthenticated ? "Logout" : "Login"}
         </button>
-        <button onClick={toggleDarkMode} style={themeButton}>
-          {darkMode ? "🌙" : "☀️"}
-        </button>
+        {/* // Replace the button JSX: */}
+<button
+  onClick={toggleDarkMode}
+  style={themeButton}
+  onMouseOver={e => {
+    e.currentTarget.style.background = "rgba(255,255,255,0.15)";
+    e.currentTarget.style.boxShadow = "0 6px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.2)";
+  }}
+  onMouseOut={e => {
+    e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+    e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.15)";
+  }}
+>
+  {darkMode ? "🌙" : "☀️"}
+</button>
       </div>
     </nav>
   );
@@ -136,13 +146,19 @@ const authButton = {
   cursor: "pointer",
 };
 
+// Replace the themeButton style object:
 const themeButton = {
-  color: "#fff",
-  background: "var(--accent)",
-  border: "none",
+  background: "rgba(255, 255, 255, 0.08)",
+  backdropFilter: "blur(16px) saturate(180%)",
+  WebkitBackdropFilter: "blur(16px) saturate(180%)",
+  border: "1px solid rgba(255, 255, 255, 0.18)",
   borderRadius: "999px",
   padding: "10px 16px",
   cursor: "pointer",
+  fontSize: "16px",
+  color: "var(--text-primary)",
+  boxShadow: "0 4px 16px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.15)",
+  transition: "background 0.2s, box-shadow 0.2s",
 };
 
 export default memo(NavBar);

@@ -6,8 +6,8 @@ import NavBar from "./components/NavBar";
 import withAuth from "./hoc/withAuth";
 import Toast from "./components/Toast";
 
+const Recipes = lazy(() => import("./pages/Recipes").then((module) => ({ default: withAuth(module.default) })));
 const Home = lazy(() => import("./pages/Home"));
-const Recipes = lazy(() => import("./pages/Recipes"));
 const Favorites = lazy(() => import("./pages/Favorites"));
 const Login = lazy(() => import("./pages/Login"));
 const Profile = lazy(() => import("./pages/Profile").then((module) => ({ default: withAuth(module.default) })));

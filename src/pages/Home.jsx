@@ -4,63 +4,156 @@ import { useNavigate } from "react-router-dom";
 export default function Home() {
   const { recipes, resetRecipes } = useRecipes();
   const navigate = useNavigate();
+  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+
 
   return (
-    <div style={{ textAlign: "center", marginTop: "80px", padding: "0 20px" }}>
-      <div style={{ fontSize: "80px", marginBottom: "16px" }}>🍳</div>
-      <h1 style={{
-        fontSize: "48px",
-        background: "linear-gradient(90deg, #e67e22, #f39c12)",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        marginBottom: "16px"
-      }}>
-        Recipe Book
-      </h1>
-      <p style={{ color: "#aaa", fontSize: "18px", marginBottom: "8px" }}>
-        Твоя личная коллекция рецептов
-      </p>
-      <p style={{ color: "#eee", fontSize: "22px", marginBottom: "40px" }}>
-        Сохранено рецептов: <strong style={{ color: "#e67e22" }}>{recipes.length}</strong>
-      </p>
-      <button
-        onClick={() => navigate("/recipes")}
-        style={{
-          padding: "14px 36px",
-          background: "linear-gradient(90deg, #e67e22, #f39c12)",
-          color: "#fff",
-          border: "none",
-          borderRadius: "30px",
-          fontSize: "18px",
-          cursor: "pointer",
-          boxShadow: "0 4px 20px rgba(230,126,34,0.4)",
-          transition: "transform 0.2s",
-        }}
-        onMouseOver={e => e.target.style.transform = "scale(1.05)"}
-        onMouseOut={e => e.target.style.transform = "scale(1)"}
-      >
-        Перейти к рецептам →
-      </button>
-      
-      <div style={{ marginTop: "20px" }}>
-        <button
-          onClick={resetRecipes}
-          style={{
-            padding: "10px 20px",
-            background: "#95a5a6",
-            color: "#fff",
-            border: "none",
-            borderRadius: "20px",
-            fontSize: "14px",
-            cursor: "pointer",
-            opacity: 0.8,
-          }}
-          onMouseOver={e => e.target.style.opacity = "1"}
-          onMouseOut={e => e.target.style.opacity = "0.8"}
-        >
-          🔄 Сбросить рецепты (для обновления)
-        </button>
+    <div className="page-enter" style={pageStyle}>
+
+      {/* Hero */}
+      <div style={heroStyle}>
+        <div style={emojiStyle}>🍳</div>
+        <h1 className="gradient-text" style={{ marginBottom: "16px" }}>
+          Recipe Book
+        </h1>
+        <p style={subtitleStyle}>
+          Твоя личная коллекция рецептов — храни, находи и готовь с удовольствием
+        </p>
+
+        <div style={ctaRowStyle}>
+          {isAuthenticated ? (
+            <button
+              className="btn-accent"
+              onClick={() => navigate("/recipes")}
+            >
+              Перейти к рецептам →
+            </button>
+          ) : (
+            <>
+              <button
+                style={authNoteStyle}
+                className="btn-accent"
+                onClick={() => navigate("/login", { state: { from: { pathname: "/recipes" } } })}
+              >
+                Войдите, чтобы просматривать рецепты
+              </button>
+            </>
+          )}
+        </div>
+
+      </div>
+
+      {/* Feature cards */}
+      <div style={featureGridStyle}>
+        {[
+          { icon: "🔍", title: "Поиск", desc: "Быстрый поиск по названию и категории прямо на странице рецептов" },
+          { icon: "❤️", title: "Избранное", desc: "Сохраняй любимые рецепты и возвращайся к ним в любой момент" },
+          { icon: "✏️", title: "Свои рецепты", desc: "Добавляй собственные рецепты и редактируй их когда угодно" },
+          { icon: "🤖", title: "AI Ассистент", desc: "Получай советы и идеи для готовки от встроенного ИИ" },
+        ].map((f) => (
+          <div key={f.title} className="glass card-hover" style={featureCardStyle}>
+            <span style={featureIconStyle}>{f.icon}</span>
+            <h3 style={{ color: "var(--text-primary)", marginBottom: "8px" }}>{f.title}</h3>
+            <p style={{ fontSize: "14px", lineHeight: 1.6 }}>{f.desc}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
+
+
+const pageStyle = {
+  maxWidth: "960px",
+  margin: "0 auto",
+  padding: "20px 24px",        // was 60px top, 80px bottom
+};
+
+const heroStyle = {
+  textAlign: "center",
+  marginBottom: "24px",        // was 56px
+};
+
+const emojiStyle = {
+  fontSize: "48px",            // was 72px
+  marginBottom: "10px",
+  display: "block",
+  filter: "drop-shadow(0 8px 24px rgba(230,126,34,0.4))",
+};
+const authNoteStyle = {
+  color: "var(--text-primary)",
+  background: "transparent",
+  border: "1px solid var(--accent)",
+  borderRadius: "999px",
+  padding: "10px 16px",
+  cursor: "pointer",
+};
+const subtitleStyle = {
+  fontSize: "15px",            // was 18px
+  color: "var(--text-secondary)",
+  maxWidth: "480px",
+  margin: "0 auto 20px",      // was 36px
+  lineHeight: 1.6,
+};
+
+const ctaRowStyle = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "10px",
+};
+
+const statsRowStyle = {
+  display: "flex",
+  gap: "16px",                 // was 20px
+  justifyContent: "center",
+  flexWrap: "wrap",
+  marginBottom: "24px",        // was 56px
+};
+
+const statCardStyle = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "4px",
+  padding: "16px 28px",        // was 28px 36px
+  minWidth: "110px",
+};
+
+const statIconStyle = {
+  fontSize: "20px",            // was 28px
+};
+
+const statValueStyle = {
+  fontSize: "28px",            // was 36px
+  fontWeight: "800",
+  color: "var(--accent)",
+  fontFamily: "'DM Serif Display', serif",
+};
+
+const statLabelStyle = {
+  fontSize: "11px",
+  color: "var(--text-secondary)",
+  fontWeight: "500",
+  textTransform: "uppercase",
+  letterSpacing: "0.08em",
+};
+
+const featureGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(4, 1fr)",   // force 4 columns in one row
+  gap: "14px",                              // was 20px
+  marginBottom: "16px",
+};
+
+const featureCardStyle = {
+  padding: "18px 16px",        // was 28px 24px
+  display: "flex",
+  flexDirection: "column",
+  gap: "4px",
+};
+
+const featureIconStyle = {
+  fontSize: "22px",            // was 32px
+  marginBottom: "4px",
+};

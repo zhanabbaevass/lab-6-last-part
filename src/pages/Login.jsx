@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useRecipes } from "../context/RecipeContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { addNotification } = useRecipes();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,11 +12,13 @@ export default function Login() {
   const [showTwoFactor, setShowTwoFactor] = useState(false);
   const [error, setError] = useState("");
 
+  // If already logged in — send to where they came from, or /recipes
   useEffect(() => {
     if (localStorage.getItem("isAuthenticated") === "true") {
-      navigate("/profile", { replace: true });
+      const destination = location.state?.from?.pathname || "/recipes";
+      navigate(destination, { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, location]);
 
   const handleSubmit = useCallback(
     (event) => {
@@ -27,8 +30,7 @@ export default function Login() {
           setError("Пожалуйста, введите email и пароль.");
           return;
         }
-        // Simulate sending 2FA code - in real app, this would send to email/SMS
-        const mockCode = "123456"; // Demo code
+        const mockCode = "123456";
         localStorage.setItem("temp2fa", mockCode);
         setShowTwoFactor(true);
         addNotification(`Код подтверждения: ${mockCode} (демо)`, "info");
@@ -40,7 +42,6 @@ export default function Login() {
         return;
       }
 
-      // Check against stored demo code
       const expectedCode = localStorage.getItem("temp2fa");
       if (twoFactorCode !== expectedCode) {
         setError("Неверный код подтверждения.");
@@ -48,17 +49,21 @@ export default function Login() {
       }
 
       localStorage.setItem("isAuthenticated", "true");
+      localStorage.removeItem("temp2fa");
       addNotification("Вы успешно вошли в систему", "success");
-      navigate("/profile", { replace: true });
+
+      // Go back to where they came from, default to /recipes
+      const destination = location.state?.from?.pathname || "/recipes";
+      navigate(destination, { replace: true });
     },
-    [email, password, twoFactorCode, showTwoFactor, addNotification, navigate]
+    [email, password, twoFactorCode, showTwoFactor, addNotification, navigate, location]
   );
 
   return (
     <div style={loginWrapper}>
       <div style={loginCard}>
         <h1>Вход в аккаунт</h1>
-        <p style={subtitle}>Введите учётные данные, чтобы открыть страницу профиля.</p>
+        <p style={subtitle}>Введите учётные данные, чтобы открыть страницу рецептов.</p>
         <form onSubmit={handleSubmit} style={loginForm}>
           {!showTwoFactor ? (
             <>
@@ -159,7 +164,7 @@ const submitBtn = {
   borderRadius: "var(--radius)",
   border: "none",
   background: "var(--accent)",
-  color: "#e19302",
+  color: "#ffffff",
   fontWeight: "700",
   cursor: "pointer",
 };
