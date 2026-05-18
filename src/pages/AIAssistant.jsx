@@ -3,8 +3,13 @@ import { useRecipes } from "../context/RecipeContext";
 
 export default function AIAssistant() {
   const { recipes } = useRecipes();
+  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Привет! Я ваш кулинарный помощник. Спросите меня о рецептах, ингредиентах или советах по приготовлению!" }
+    {
+      role: "assistant",
+      content:
+        "Hi! I am your cooking assistant. Ask me about recipes, ingredients, quick meals, healthy food, or cooking tips.",
+    },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -12,98 +17,260 @@ export default function AIAssistant() {
   const getResponse = (query) => {
     const q = query.toLowerCase();
 
-    // Поиск по рецептам
-    const matched = recipes.filter(r =>
-      r.title?.toLowerCase().includes(q) ||
-      r.category?.toLowerCase().includes(q) ||
-      (r.ingredients && r.ingredients.some(ing => ing.toLowerCase().includes(q)))
+    const matched = recipes.filter(
+      (r) =>
+        r.title?.toLowerCase().includes(q) ||
+        r.category?.toLowerCase().includes(q) ||
+        (r.ingredients &&
+          r.ingredients.some((ing) => ing.toLowerCase().includes(q)))
     );
 
     if (matched.length > 0) {
-      const list = matched.slice(0, 3).map(r => {
-        const ings = r.ingredients?.join(", ") || "не указаны";
-        const time = r.time ? `⏱ ${r.time} мин` : "";
-        return `📌 **${r.title}** (${r.category}) ${time}\nИнгредиенты: ${ings}`;
-      }).join("\n\n");
-      return `Нашла подходящие рецепты:\n\n${list}`;
+      const list = matched
+        .slice(0, 3)
+        .map((r) => {
+          const time = r.time ? `⏱ ${r.time} min` : "";
+          const category = r.category || "No category";
+          return `📌 ${r.title} (${category}) ${time}`;
+        })
+        .join("\n");
+
+      return `I found these recipes in your recipe book:\n${list}`;
     }
 
-    // Советы по приготовлению
-    if (q.includes("совет") || q.includes("как") || q.includes("помог")) {
-      return "Вот несколько общих советов:\n• Всегда читайте рецепт до конца перед началом\n• Подготовьте все ингредиенты заранее\n• Солите блюда в конце приготовления\n• Используйте свежие продукты для лучшего вкуса";
+    if (q.includes("quick") || q.includes("fast") || q.includes("быстро")) {
+      return "Quick meal ideas: omelette, pasta with tomato sauce, chicken wrap, salad bowl, or fried rice. Choose recipes with cooking time under 30 minutes.";
     }
 
-    if (q.includes("привет") || q.includes("здравствуй")) {
-      return "Привет! Чем могу помочь? Спросите меня о рецептах или советах по приготовлению 🍳";
+    if (q.includes("healthy") || q.includes("полез")) {
+      return "Healthy ideas: vegetable salad, grilled chicken, oatmeal with fruits, soup, or baked fish. Try to use less oil, more vegetables, and fresh ingredients.";
     }
 
-    if (q.includes("список") || q.includes("все рецепты") || q.includes("что есть")) {
-      if (recipes.length === 0) return "Ваша книга рецептов пока пуста. Добавьте рецепты через вкладку Добавить!";
-      const list = recipes.map(r => `• ${r.title} (${r.category})`).join("\n");
-      return `В вашей книге рецептов:\n${list}`;
+    if (q.includes("chicken") || q.includes("куриц")) {
+      return "With chicken you can cook: chicken soup, grilled chicken with rice, chicken salad, pasta with chicken, or chicken wrap.";
     }
 
-    if (q.includes("категори") || q.includes("обед") || q.includes("ужин") || q.includes("завтрак")) {
-      const cats = [...new Set(recipes.map(r => r.category).filter(Boolean))];
-      if (cats.length === 0) return "Категории пока не заданы.";
-      return `Категории в вашей книге: ${cats.join(", ")}`;
+    if (q.includes("egg") || q.includes("яйц")) {
+      return "With eggs you can cook: omelette, boiled eggs, egg sandwich, shakshuka, pancakes, or fried rice with egg.";
     }
 
-    return "Я не совсем поняла вопрос 😊 Попробуйте спросить:\n• 'Покажи все рецепты'\n• 'Рецепты с курицей'\n• 'Что на обед?'\n• 'Дай советы по приготовлению'";
+    if (q.includes("dessert") || q.includes("десерт")) {
+      return "Dessert ideas: pancakes, fruit salad, chocolate cake, cookies, cheesecake, or yogurt with berries.";
+    }
+
+    if (q.includes("replace") || q.includes("substitute") || q.includes("замен")) {
+      return "Common substitutions: milk can be replaced with yogurt or plant milk, butter with oil, sugar with honey, and sour cream with Greek yogurt.";
+    }
+
+    if (q.includes("tip") || q.includes("advice") || q.includes("совет")) {
+      return "Cooking tips:\n• Read the full recipe before cooking\n• Prepare ingredients in advance\n• Taste food while cooking\n• Do not overcook pasta\n• Add salt gradually";
+    }
+
+    if (q.includes("hello") || q.includes("hi") || q.includes("привет")) {
+      return "Hello! Ask me what to cook, how to replace ingredients, or how to make a recipe faster.";
+    }
+
+    return "I can help with recipe suggestions, ingredients, substitutions, quick meals, healthy ideas, and cooking tips. Try asking: 'What can I cook with eggs?' or 'Give me a quick dinner idea'.";
   };
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!input.trim()) return;
 
-    const userMessage = { role: "user", content: input };
-    setMessages(prev => [...prev, userMessage]);
+    const userText = input;
+    setMessages((prev) => [...prev, { role: "user", content: userText }]);
     setInput("");
     setIsLoading(true);
 
     setTimeout(() => {
-      const reply = getResponse(input);
-      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
+      const reply = getResponse(userText);
+      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
       setIsLoading(false);
-    }, 600);
+    }, 500);
   };
 
   return (
-    <div style={container}>
-      <h1>🤖 AI Кулинарный Ассистент</h1>
-      <div style={chatContainer}>
-        {messages.map((msg, index) => (
-          <div key={index} style={msg.role === "user" ? userMessage : assistantMessage}>
-            <strong>{msg.role === "user" ? "Вы:" : "Ассистент:"}</strong>{" "}
-            {msg.content.split("\n").map((line, i) => (
-              <span key={i}>{line}<br /></span>
-            ))}
+    <>
+      <button style={floatingButton} onClick={() => setIsOpen(!isOpen)}>
+        {isOpen ? "✕" : "AI"}
+      </button>
+
+      {isOpen && (
+        <div style={chatWindow}>
+          <div style={chatHeader}>
+            <div>
+              <strong>AI Cooking Assistant</strong>
+              <p style={subtitle}>Smart recipe helper</p>
+            </div>
+            <button style={closeBtn} onClick={() => setIsOpen(false)}>
+              ✕
+            </button>
           </div>
-        ))}
-        {isLoading && <div style={loadingMessage}>Ассистент печатает...</div>}
-      </div>
-      <div style={inputContainer}>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Спросите о рецептах, ингредиентах или советах..."
-          style={inputStyle}
-          disabled={isLoading}
-        />
-        <button onClick={handleSend} style={buttonStyle} disabled={isLoading}>
-          {isLoading ? "..." : "Отправить"}
-        </button>
-      </div>
-    </div>
+
+          <div style={chatBody}>
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                style={msg.role === "user" ? userMessage : assistantMessage}
+              >
+                {msg.content.split("\n").map((line, i) => (
+                  <span key={i}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
+              </div>
+            ))}
+
+            {isLoading && <div style={assistantMessage}>Assistant is typing...</div>}
+          </div>
+
+          <div style={quickActions}>
+            <button onClick={() => setInput("Give me a quick dinner idea")}>
+              Quick dinner
+            </button>
+            <button onClick={() => setInput("Suggest healthy food")}>
+              Healthy
+            </button>
+            <button onClick={() => setInput("Cooking tips")}>Tips</button>
+          </div>
+
+          <div style={inputArea}>
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Ask about recipes..."
+              style={inputStyle}
+            />
+            <button onClick={handleSend} style={sendBtn}>
+              Send
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
-const container = { maxWidth: "800px", margin: "0 auto", padding: "20px", color: "var(--text-primary)" };
-const chatContainer = { border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "10px", height: "400px", overflowY: "auto", background: "var(--bg-card)", marginBottom: "20px" };
-const userMessage = { marginBottom: "10px", textAlign: "right", color: "#e67e22" };
-const assistantMessage = { marginBottom: "10px", color: "var(--text-primary)" };
-const loadingMessage = { marginBottom: "10px", color: "#999", fontStyle: "italic" };
-const inputContainer = { display: "flex", gap: "10px" };
-const inputStyle = { flex: 1, padding: "10px", border: "1px solid var(--border)", borderRadius: "var(--radius)", background: "var(--bg-input)", color: "var(--text-primary)" };
-const buttonStyle = { padding: "10px 20px", background: "#e67e22", color: "#fff", border: "none", borderRadius: "var(--radius)", cursor: "pointer" };
+const floatingButton = {
+  position: "fixed",
+  right: "24px",
+  bottom: "24px",
+  width: "64px",
+  height: "64px",
+  borderRadius: "50%",
+  border: "none",
+  background: "#e67e22",
+  color: "#fff",
+  fontSize: "20px",
+  cursor: "pointer",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+  zIndex: 2000,
+  transition: "0.3s ease",
+};
+
+const chatWindow = {
+  position: "fixed",
+  right: "24px",
+  bottom: "100px",
+  width: "360px",
+  maxWidth: "calc(100vw - 40px)",
+  height: "520px",
+  background: "#ffffff",
+  color: "#222",
+  borderRadius: "22px",
+  border: "1px solid #ddd",
+  boxShadow: "0 18px 45px rgba(0,0,0,0.35)",
+  overflow: "hidden",
+  zIndex: 9999,
+  display: "flex",
+  flexDirection: "column",
+};
+
+const chatHeader = {
+  padding: "16px",
+  background: "#e67e22",
+  color: "#fff",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+};
+
+const subtitle = {
+  margin: "4px 0 0",
+  fontSize: "12px",
+  opacity: 0.9,
+};
+
+const closeBtn = {
+  background: "transparent",
+  border: "none",
+  color: "#fff",
+  fontSize: "18px",
+  cursor: "pointer",
+};
+
+const chatBody = {
+  flex: 1,
+  padding: "14px",
+  overflowY: "auto",
+  background: "#f7f7f7",
+};
+
+const userMessage = {
+  marginLeft: "auto",
+  marginBottom: "10px",
+  padding: "10px 12px",
+  maxWidth: "80%",
+  background: "#e67e22",
+  color: "#fff",
+  borderRadius: "14px 14px 0 14px",
+  fontSize: "14px",
+  lineHeight: 1.4,
+};
+
+const assistantMessage = {
+  marginRight: "auto",
+  marginBottom: "10px",
+  padding: "10px 12px",
+  maxWidth: "85%",
+  background: "var(--bg-card)",
+  color: "var(--text-primary)",
+  border: "1px solid var(--border)",
+  borderRadius: "14px 14px 14px 0",
+  fontSize: "14px",
+  lineHeight: 1.4,
+};
+
+const quickActions = {
+  display: "flex",
+  gap: "8px",
+  padding: "10px",
+  borderTop: "1px solid var(--border)",
+};
+
+
+const inputArea = {
+  display: "flex",
+  gap: "8px",
+  padding: "12px",
+  borderTop: "1px solid var(--border)",
+};
+
+const inputStyle = {
+  flex: 1,
+  padding: "10px",
+  border: "1px solid var(--border)",
+  borderRadius: "12px",
+  background: "var(--bg-input)",
+  color: "var(--text-primary)",
+};
+
+const sendBtn = {
+  padding: "10px 14px",
+  border: "none",
+  borderRadius: "12px",
+  background: "#e67e22",
+  color: "#fff",
+  cursor: "pointer",
+};

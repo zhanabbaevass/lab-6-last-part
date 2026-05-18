@@ -59,7 +59,6 @@ function NavBar() {
         </NavLink>
         <NavLink to="/reviews" style={linkStyle}>Отзывы</NavLink>
         <NavLink to="/profile" style={linkStyle}>Профиль</NavLink>
-        <NavLink to="/ai-assistant" style={linkStyle}>AI Ассистент</NavLink>
       </div>
 
       <div style={actionsStyle}>

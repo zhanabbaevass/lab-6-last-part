@@ -1,18 +1,28 @@
 import { createContext, useContext, memo } from "react";
 import { useRecipes } from "../context/RecipeContext";
+import { useNavigate } from "react-router-dom";
 
 const RecipeCardContext = createContext(null);
 
 function RecipeCard({ recipe, children, onClick }) {
   const { deleteRecipe, toggleLike } = useRecipes();
+  const navigate = useNavigate();
+
+  const isUserCreated = recipe.isUserCreated || Number(recipe.id) > 3;
 
   const defaultCard = (
     <>
       <Header />
       <Body />
       <Footer
-        onFavorite={() => toggleLike(recipe.id)}
+        isUserCreated={isUserCreated}
+        onFavorite={() => toggleLike(recipe.id || recipe.idMeal)}
         onDelete={() => deleteRecipe(recipe.id)}
+        onDetails={() =>
+          navigate(`/recipe/${recipe.id || recipe.idMeal}`, {
+            state: { recipe },
+          })
+        }
       />
     </>
   );
@@ -32,7 +42,9 @@ function RecipeCard({ recipe, children, onClick }) {
 
 const Header = memo(function Header() {
   const recipe = useContext(RecipeCardContext);
-  const imageUrl = recipe.image || "https://www.themealdb.com/images/media/meals/llcbn01574260722.jpg";
+  const imageUrl =
+    recipe.image ||
+    "https://www.themealdb.com/images/media/meals/llcbn01574260722.jpg";
 
   return (
     <div style={headerStyle}>
@@ -53,31 +65,60 @@ const Body = memo(function Body() {
   return (
     <div style={bodyStyle}>
       <p style={categoryStyle}>{recipe.category || "Без категории"}</p>
-      <p>{description.length === 100 ? `${description}...` : description}</p>
+      <p style={descriptionStyle}>
+        {description.length === 100 ? `${description}...` : description}
+      </p>
     </div>
   );
 });
 
-const Footer = memo(function Footer({ onFavorite, onDelete }) {
+const Footer = memo(function Footer({
+  onFavorite,
+  onDelete,
+  onDetails,
+  isUserCreated,
+}) {
   const recipe = useContext(RecipeCardContext);
 
   return (
     <div style={footerStyle}>
-      <button
-        onClick={(e) => { e.stopPropagation(); onFavorite(); }}
-        style={favoriteBtn}
-      >
-        {recipe.liked ? "❤️ Избранное" : "🤍 В избранное"}
-      </button>
-      <span style={timeStyle}>⏱ {recipe.time || "—"} мин</span>
-      {onDelete && (
+      <div style={metaRow}>
         <button
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          style={deleteBtn}
+          onClick={(e) => {
+            e.stopPropagation();
+            onFavorite();
+          }}
+          style={favoriteBtn}
         >
-          🗑️
+          {recipe.liked ? "❤️ Favorite" : "🤍 Favorite"}
         </button>
-      )}
+
+        <span style={timeStyle}>⏱ {recipe.time || "—"} min</span>
+      </div>
+
+      <div style={actionRow}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDetails();
+          }}
+          style={detailsBtn}
+        >
+          Details
+        </button>
+
+        {isUserCreated && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            style={deleteBtn}
+          >
+            Delete
+          </button>
+        )}
+      </div>
     </div>
   );
 });
@@ -93,7 +134,7 @@ export default MemoizedRecipeCard;
 const cardStyle = {
   background: "var(--bg-card)",
   border: "1px solid var(--border)",
-  borderRadius: "var(--radius)",
+  borderRadius: "18px",
   overflow: "hidden",
   boxShadow: "var(--shadow)",
   transition: "transform 0.25s ease, box-shadow 0.25s ease",
@@ -116,7 +157,7 @@ const imageStyle = {
 const imageOverlay = {
   position: "absolute",
   inset: 0,
-  background: "linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.6))",
+  background: "linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.65))",
 };
 
 const headerText = {
@@ -129,9 +170,10 @@ const headerText = {
 };
 
 const bodyStyle = {
-  padding: "18px 18px 12px",
+  padding: "18px 18px 10px",
   color: "var(--text-primary)",
   lineHeight: 1.5,
+  minHeight: "125px",
 };
 
 const categoryStyle = {
@@ -140,36 +182,61 @@ const categoryStyle = {
   marginBottom: "10px",
 };
 
+const descriptionStyle = {
+  color: "var(--text-primary)",
+  margin: 0,
+};
+
 const footerStyle = {
+  padding: "0 18px 18px",
+};
+
+const metaRow = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  padding: "0 18px 18px",
   gap: "12px",
-  flexWrap: "wrap",
+  marginBottom: "12px",
+};
+
+const actionRow = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "10px",
 };
 
 const favoriteBtn = {
+  background: "transparent",
+  color: "var(--text-primary)",
+  border: "1px solid var(--border)",
+  borderRadius: "12px",
+  padding: "10px 12px",
+  cursor: "pointer",
+  fontWeight: "700",
+};
+
+const detailsBtn = {
   background: "var(--accent)",
   color: "#fff",
   border: "none",
-  borderRadius: "10px",
-  padding: "10px 14px",
+  borderRadius: "12px",
+  padding: "11px 14px",
   cursor: "pointer",
-  flex: "1 1 auto",
+  fontWeight: "700",
 };
 
 const deleteBtn = {
   background: "#e74c3c",
   color: "#fff",
   border: "none",
-  borderRadius: "10px",
-  padding: "10px 14px",
+  borderRadius: "12px",
+  padding: "11px 14px",
   cursor: "pointer",
-  fontSize: "16px",
+  fontWeight: "700",
 };
 
 const timeStyle = {
   color: "var(--text-secondary)",
-  fontWeight: "600",
+  fontWeight: "700",
+  whiteSpace: "nowrap",
 };
