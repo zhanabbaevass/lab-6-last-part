@@ -50,7 +50,7 @@ export default function Recipes() {
       {/* Top bar */}
       <div style={topBarStyle}>
         <div>
-          <h1 style={{ marginBottom: "4px" }}>📖 Рецепты</h1>
+          <h1 style={{ marginBottom: "4px" }}>Рецепты</h1>
           <p style={{ fontSize: "14px", color: "var(--text-secondary)", margin: 0 }}>
             {filtered.length} рецептов найдено
           </p>
@@ -114,7 +114,7 @@ export default function Recipes() {
       )}
 
       {/* Grid */}
-      <div className={gridStyle}>
+      <div style={gridStyle}>
         {filtered.map((r) => (
           <RecipeCard key={r.id} recipe={r} onClick={() => handleEditRecipe(r)} />
         ))}

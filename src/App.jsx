@@ -5,14 +5,17 @@ import { FavoritesProvider } from "./context/FavoritesContext.jsx";
 import NavBar from "./components/NavBar";
 import withAuth from "./hoc/withAuth";
 import Toast from "./components/Toast";
+import AIAssistant from "./pages/AIAssistant";
 
 const Recipes = lazy(() => import("./pages/Recipes").then((module) => ({ default: withAuth(module.default) })));
 const Home = lazy(() => import("./pages/Home"));
+const RecipeDetails = lazy(() => import("./pages/RecipeDetails"));
 const Favorites = lazy(() => import("./pages/Favorites"));
 const Login = lazy(() => import("./pages/Login"));
-const Profile = lazy(() => import("./pages/Profile").then((module) => ({ default: withAuth(module.default) })));
+const Profile = lazy(() =>
+  import("./pages/Profile").then((module) => ({ default: withAuth(module.default) }))
+);
 const NotFound = lazy(() => import("./pages/NotFound"));
-const AIAssistant = lazy(() => import("./pages/AIAssistant"));
 const Search = lazy(() => import("./pages/Search"));
 const AddRecipe = lazy(() => import("./pages/AddRecipe"));
 const Reviews = lazy(() => import("./pages/Reviews"));
@@ -28,24 +31,29 @@ function Loading() {
 
 function AppContent() {
   const { darkMode } = useRecipes();
+
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: darkMode ? "#1a1a2e" : "#f5f0e8",
-      color: darkMode ? "#eee" : "#222",
-      transition: "all 0.3s",
-    }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: darkMode ? "#1a1a2e" : "#f5f0e8",
+        color: darkMode ? "#eee" : "#222",
+        transition: "all 0.3s",
+      }}
+    >
       <NavBar />
-       <Toast />
+      <Toast />
+      <AIAssistant />
+
       <div style={{ padding: "20px" }}>
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/recipes" element={<Recipes />} />
+            <Route path="/recipe/:id" element={<RecipeDetails />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/login" element={<Login />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/ai-assistant" element={<AIAssistant />} />
             <Route path="/search" element={<Search />} />
             <Route path="/add-recipe" element={<AddRecipe />} />
             <Route path="/edit-recipe/:id" element={<EditRecipe />} />

@@ -1,5 +1,5 @@
 import { useCallback, memo } from "react";
-import { useRecipes } from "../context/RecipeContext";
+import { useRecipes } from "../context/RecipeContext.jsx";
 import useForm from "../hooks/useForm.js";
 
 const initialValues = {
