@@ -1,24 +1,57 @@
 import { useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useRecipes } from "../context/RecipeContext";
+import emailjs from "@emailjs/browser";
+
+const EMAILJS_SERVICE_ID = "service_7oeo66p";
+const EMAILJS_TEMPLATE_ID = "template_vrr42pi";
+const EMAILJS_PUBLIC_KEY = "xqB8np1J_S_eGrE1w";
+
+function generateCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { addNotification } = useRecipes();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [twoFactorCode, setTwoFactorCode] = useState("");
   const [showTwoFactor, setShowTwoFactor] = useState(false);
   const [error, setError] = useState("");
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem("isAuthenticated") === "true") {
-      navigate("/profile", { replace: true });
+      const destination = location.state?.from?.pathname || "/recipes";
+      navigate(destination, { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, location]);
+
+  const sendCode = async (userEmail) => {
+    const code = generateCode();
+    localStorage.setItem("temp2fa", code);
+
+    setSending(true);
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        { code, to_email: userEmail },
+        EMAILJS_PUBLIC_KEY
+      );
+      addNotification("Код отправлен на вашу почту!", "info");
+    } catch (err) {
+      // Fallback — показываем код в уведомлении если emailjs не сработал
+      addNotification(`Ошибка отправки. Код (демо): ${code}`, "info");
+    } finally {
+      setSending(false);
+    }
+  };
 
   const handleSubmit = useCallback(
-    (event) => {
+    async (event) => {
       event.preventDefault();
       setError("");
 
@@ -27,11 +60,8 @@ export default function Login() {
           setError("Пожалуйста, введите email и пароль.");
           return;
         }
-        // Simulate sending 2FA code - in real app, this would send to email/SMS
-        const mockCode = "123456"; // Demo code
-        localStorage.setItem("temp2fa", mockCode);
+        await sendCode(email);
         setShowTwoFactor(true);
-        addNotification(`Код подтверждения: ${mockCode} (демо)`, "info");
         return;
       }
 
@@ -40,7 +70,6 @@ export default function Login() {
         return;
       }
 
-      // Check against stored demo code
       const expectedCode = localStorage.getItem("temp2fa");
       if (twoFactorCode !== expectedCode) {
         setError("Неверный код подтверждения.");
@@ -48,17 +77,20 @@ export default function Login() {
       }
 
       localStorage.setItem("isAuthenticated", "true");
+      localStorage.removeItem("temp2fa");
       addNotification("Вы успешно вошли в систему", "success");
-      navigate("/profile", { replace: true });
+
+      const destination = location.state?.from?.pathname || "/recipes";
+      navigate(destination, { replace: true });
     },
-    [email, password, twoFactorCode, showTwoFactor, addNotification, navigate]
+    [email, password, twoFactorCode, showTwoFactor, addNotification, navigate, location]
   );
 
   return (
     <div style={loginWrapper}>
       <div style={loginCard}>
         <h1>Вход в аккаунт</h1>
-        <p style={subtitle}>Введите учётные данные, чтобы открыть страницу профиля.</p>
+        <p style={subtitle}>Введите учётные данные, чтобы открыть страницу рецептов.</p>
         <form onSubmit={handleSubmit} style={loginForm}>
           {!showTwoFactor ? (
             <>
@@ -80,7 +112,7 @@ export default function Login() {
           ) : (
             <>
               <div style={twoFactorInfo}>
-                <p>Код подтверждения отправлен на {email}</p>
+                <p>📧 Код отправлен на <strong>{email}</strong></p>
                 <p>Введите 6-значный код:</p>
               </div>
               <input
@@ -94,17 +126,27 @@ export default function Login() {
             </>
           )}
           {error && <div style={errorStyle}>{error}</div>}
-          <button type="submit" style={submitBtn}>
-            {showTwoFactor ? "Подтвердить" : "Войти"}
+          <button type="submit" style={submitBtn} disabled={sending}>
+            {sending ? "Отправка..." : showTwoFactor ? "Подтвердить" : "Войти"}
           </button>
           {showTwoFactor && (
-            <button
-              type="button"
-              onClick={() => setShowTwoFactor(false)}
-              style={backBtn}
-            >
-              Назад
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => { setShowTwoFactor(false); setTwoFactorCode(""); }}
+                style={backBtn}
+              >
+                Назад
+              </button>
+              <button
+                type="button"
+                onClick={() => sendCode(email)}
+                style={backBtn}
+                disabled={sending}
+              >
+                {sending ? "Отправка..." : "Отправить код повторно"}
+              </button>
+            </>
           )}
         </form>
       </div>
@@ -159,7 +201,7 @@ const submitBtn = {
   borderRadius: "var(--radius)",
   border: "none",
   background: "var(--accent)",
-  color: "#e19302",
+  color: "#ffffff",
   fontWeight: "700",
   cursor: "pointer",
 };

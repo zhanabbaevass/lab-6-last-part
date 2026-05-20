@@ -29,10 +29,18 @@ function RecipeCard({ recipe, children, onClick }) {
 
   return (
     <article
-      style={{ ...cardStyle, cursor: onClick ? "pointer" : "default" }}
-      data-testid="recipe-card"
-      onClick={onClick}
-    >
+  style={{ ...cardStyle, cursor: onClick ? "pointer" : "default" }}
+  data-testid="recipe-card"
+  onClick={onClick}
+  onMouseOver={e => {
+    e.currentTarget.style.transform = "translateY(-6px)";
+    e.currentTarget.style.boxShadow = "0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(230,126,34,0.15)";
+  }}
+  onMouseOut={e => {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = "var(--shadow)";
+  }}
+>
       <RecipeCardContext.Provider value={recipe}>
         {children || defaultCard}
       </RecipeCardContext.Provider>
@@ -138,6 +146,7 @@ const cardStyle = {
   overflow: "hidden",
   boxShadow: "var(--shadow)",
   transition: "transform 0.25s ease, box-shadow 0.25s ease",
+  width: "100%",
 };
 
 const headerStyle = {
@@ -217,7 +226,7 @@ const favoriteBtn = {
 
 const detailsBtn = {
   background: "var(--accent)",
-  color: "#fff",
+  color: "#ffffff",
   border: "none",
   borderRadius: "12px",
   padding: "11px 14px",

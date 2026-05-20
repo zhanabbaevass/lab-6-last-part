@@ -19,7 +19,7 @@ export default function Toast() {
     <div style={{
       position: "fixed",
       right: "18px",
-      bottom: "18px",
+      bottom: "90px",
       display: "flex",
       flexDirection: "column",
       gap: "12px",

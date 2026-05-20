@@ -18,7 +18,7 @@
   padding: 30px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   transition: 0.3s ease;
-}
+} 
 
 .profile-card:hover,
 .stat-card:hover {
@@ -112,4 +112,90 @@
   .profile-stats {
     grid-template-columns: 1fr;
   }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: white;
+  border-radius: 20px;
+  padding: 35px;
+  width: 300px;
+  max-width: 70%;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-card h2 {
+  margin-bottom: 5px;
+  color: #ff7043;
+}
+
+.modal-card label {
+  font-weight: 600;
+  color: #444;
+  margin-top: 5px;
+}
+
+.modal-card input,
+.modal-card textarea {
+  padding: 10px 14px;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.modal-card input:focus,
+.modal-card textarea:focus {
+  border-color: #ff7043;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.save-btn {
+  flex: 1;
+  background: #ff7043;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.save-btn:hover {
+  background: #e85d2f;
+}
+
+.cancel-btn {
+  flex: 1;
+  background: #f0f0f0;
+  color: #444;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.cancel-btn:hover {
+  background: #ddd;
 }

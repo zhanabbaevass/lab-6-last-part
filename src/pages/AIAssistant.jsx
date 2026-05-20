@@ -200,6 +200,7 @@ const subtitle = {
   margin: "4px 0 0",
   fontSize: "12px",
   opacity: 0.9,
+  color:"#fff"
 };
 
 const closeBtn = {
@@ -235,7 +236,7 @@ const assistantMessage = {
   padding: "10px 12px",
   maxWidth: "85%",
   background: "var(--bg-card)",
-  color: "var(--text-primary)",
+  color: "#e67e22",
   border: "1px solid var(--border)",
   borderRadius: "14px 14px 14px 0",
   fontSize: "14px",
@@ -255,6 +256,7 @@ const inputArea = {
   gap: "8px",
   padding: "12px",
   borderTop: "1px solid var(--border)",
+  color:"#e67e22"
 };
 
 const inputStyle = {
@@ -263,7 +265,7 @@ const inputStyle = {
   border: "1px solid var(--border)",
   borderRadius: "12px",
   background: "var(--bg-input)",
-  color: "var(--text-primary)",
+  color: "#e67e22)",
 };
 
 const sendBtn = {

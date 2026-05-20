@@ -7,8 +7,8 @@ import withAuth from "./hoc/withAuth";
 import Toast from "./components/Toast";
 import AIAssistant from "./pages/AIAssistant";
 
+const Recipes = lazy(() => import("./pages/Recipes").then((module) => ({ default: withAuth(module.default) })));
 const Home = lazy(() => import("./pages/Home"));
-const Recipes = lazy(() => import("./pages/Recipes"));
 const RecipeDetails = lazy(() => import("./pages/RecipeDetails"));
 const Favorites = lazy(() => import("./pages/Favorites"));
 const Login = lazy(() => import("./pages/Login"));
